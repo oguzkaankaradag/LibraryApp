@@ -2,6 +2,7 @@ package com.example.app.service.impl;
 
 
 import com.example.app.dto.BookDTO;
+import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.mapper.BookMapper;
 import com.example.app.model.Book;
 import com.example.app.repository.BookRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -22,26 +22,32 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDTO> getAllBooks() {
         List<Book> books = bookRepository.findAll();
-        return books.stream()
-                .map(BookMapper.INSTANCE::bookToBookDTO)
-                .collect(Collectors.toList());
+        return BookMapper.INSTANCE.booksToBookDTOs(books);
     }
 
     @Override
-    public Optional<BookDTO> getBookById(Long id) {
+    public BookDTO getBookById(Long id) {
         Optional<Book> bookOptional = bookRepository.findById(id);
-        return bookOptional.map(BookMapper.INSTANCE::bookToBookDTO);
+        if (bookOptional.isPresent()) {
+            return BookMapper.INSTANCE.bookToBookDTO(bookOptional.get());
+        } else {
+            throw new ResourceNotFoundException("Book not found with id: " + id);
+        }
     }
 
     @Override
     public BookDTO saveBook(BookDTO bookDTO) {
         Book book = BookMapper.INSTANCE.bookDTOToBook(bookDTO);
-        Book savedBook = bookRepository.save(book);
-        return BookMapper.INSTANCE.bookToBookDTO(savedBook);
+        book = bookRepository.save(book);
+        return BookMapper.INSTANCE.bookToBookDTO(book);
     }
 
     @Override
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        if (bookRepository.existsById(id)) {
+            bookRepository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("Book not found with id: " + id);
+        }
     }
 }
