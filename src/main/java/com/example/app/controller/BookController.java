@@ -5,15 +5,15 @@ import com.example.app.exception.ResourceNotFoundException;
 import com.example.app.mapper.BookMapper;
 import com.example.app.model.Book;
 import com.example.app.service.BookService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/books")
+@Controller
+@RequestMapping("api/books")
 public class BookController {
 
     @Autowired
@@ -22,62 +22,50 @@ public class BookController {
     @Autowired
     private BookMapper bookMapper;
 
-    @GetMapping
-    public List<BookDTO> getAllBooks() {
+    @GetMapping("/list")
+    public String getAllBooks(Model model) {
         List<Book> books = bookService.getAllBooks();
-        return bookMapper.booksToBookDTOs(books);
+        model.addAttribute("books", bookMapper.booksToBookDTOs(books));
+        return "book-list";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> getBookById(@PathVariable Long id) {
+    @GetMapping("/view/{id}")
+    public String getBookById(@PathVariable Long id, Model model) {
         Book book = bookService.getBookById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id " + id));
-        return ResponseEntity.ok(bookMapper.bookToBookDTO(book));
+        model.addAttribute("book", bookMapper.bookToBookDTO(book));
+        return "book-view";
     }
 
-    @GetMapping("/search")
-    public List<BookDTO> searchBooks(@RequestParam String query) {
-        List<Book> books = bookService.searchBooks(query);
-        return bookMapper.booksToBookDTOs(books);
-    }
-
-
-    @PostMapping
-    public BookDTO createBook(@Valid @RequestBody BookDTO bookDTO) {
+    @PostMapping("/create")
+    public String createBook(@ModelAttribute("book") BookDTO bookDTO) {
         Book book = bookMapper.bookDTOToBook(bookDTO);
-        book = bookService.saveBook(book);
-        return bookMapper.bookToBookDTO(book);
+        bookService.saveBook(book);
+        return "redirect:/books/list";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @Valid @RequestBody BookDTO bookDTO) {
+    @GetMapping("/edit/{id}")
+    public String editBook(@PathVariable Long id, Model model) {
+        Book book = bookService.getBookById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id " + id));
+        model.addAttribute("book", bookMapper.bookToBookDTO(book));
+        return "book-edit";
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateBook(@PathVariable Long id, @ModelAttribute("book") BookDTO bookDTO) {
         if (!bookService.getBookById(id).isPresent()) {
             throw new ResourceNotFoundException("Book not found with id " + id);
         }
         Book book = bookMapper.bookDTOToBook(bookDTO);
         book.setId(id);
-        book = bookService.saveBook(book);
-        return ResponseEntity.ok(bookMapper.bookToBookDTO(book));
+        bookService.saveBook(book);
+        return "redirect:/books/list";
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<BookDTO> partialUpdateBook(@PathVariable Long id, @Valid @RequestBody BookDTO bookDTO) {
-        Book book = bookService.getBookById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id " + id));
-
-        if (bookDTO.getTitle() != null) book.setTitle(bookDTO.getTitle());
-        if (bookDTO.getAuthor() != null) book.setAuthor(bookDTO.getAuthor());
-        if (bookDTO.getIsbn() != null) book.setIsbn(bookDTO.getIsbn());
-
-        book = bookService.saveBook(book);
-        return ResponseEntity.ok(bookMapper.bookToBookDTO(book));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        bookService.getBookById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id " + id));
+    @GetMapping("/delete/{id}")
+    public String deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/books/list";
     }
 }
