@@ -1,26 +1,24 @@
 package com.example.app.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
+@Data
 public class BookDTO {
+
     private Long id;
 
-    @NotEmpty(message = "Title is required")
-    @Size(max = 255, message = "Title cannot be longer than 255 characters")
+    @NotBlank(message = "Title is mandatory")
     private String title;
 
-    @NotEmpty(message = "Author is required")
-    @Size(max = 255, message = "Author cannot be longer than 255 characters")
+    @NotBlank(message = "Author is mandatory")
     private String author;
 
-    @NotEmpty(message = "ISBN is required")
-    @Pattern(regexp = "^(97(8|9))?\\d{9}(\\d|X)$", message = "ISBN must be a valid format")
+    @NotBlank(message = "ISBN is mandatory")
     private String isbn;
 
-    // Getters and Setters
+    public BookDTO() {
+    }
 
     public Long getId() {
         return id;

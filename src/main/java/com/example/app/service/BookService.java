@@ -1,17 +1,14 @@
 package com.example.app.service;
 
-
-import com.example.app.dto.BookDTO;
+import com.example.app.model.Book;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookService {
 
-    List<BookDTO> getAllBooks();
-
-    BookDTO getBookById(Long id);
-
-    BookDTO saveBook(BookDTO bookDTO);
-
+    List<Book> getAllBooks();
+    Optional<Book> getBookById(Long id);
+    Book saveBook(Book book);
     void deleteBook(Long id);
 }

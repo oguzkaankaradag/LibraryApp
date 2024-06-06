@@ -1,9 +1,5 @@
 package com.example.app.service.impl;
 
-
-import com.example.app.dto.BookDTO;
-import com.example.app.exception.ResourceNotFoundException;
-import com.example.app.mapper.BookMapper;
 import com.example.app.model.Book;
 import com.example.app.repository.BookRepository;
 import com.example.app.service.BookService;
@@ -20,34 +16,22 @@ public class BookServiceImpl implements BookService {
     private BookRepository bookRepository;
 
     @Override
-    public List<BookDTO> getAllBooks() {
-        List<Book> books = bookRepository.findAll();
-        return BookMapper.INSTANCE.booksToBookDTOs(books);
+    public List<Book> getAllBooks() {
+        return bookRepository.findAll();
     }
 
     @Override
-    public BookDTO getBookById(Long id) {
-        Optional<Book> bookOptional = bookRepository.findById(id);
-        if (bookOptional.isPresent()) {
-            return BookMapper.INSTANCE.bookToBookDTO(bookOptional.get());
-        } else {
-            throw new ResourceNotFoundException("Book not found with id: " + id);
-        }
+    public Optional<Book> getBookById(Long id) {
+        return bookRepository.findById(id);
     }
 
     @Override
-    public BookDTO saveBook(BookDTO bookDTO) {
-        Book book = BookMapper.INSTANCE.bookDTOToBook(bookDTO);
-        book = bookRepository.save(book);
-        return BookMapper.INSTANCE.bookToBookDTO(book);
+    public Book saveBook(Book book) {
+        return bookRepository.save(book);
     }
 
     @Override
     public void deleteBook(Long id) {
-        if (bookRepository.existsById(id)) {
-            bookRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("Book not found with id: " + id);
-        }
+        bookRepository.deleteById(id);
     }
 }
