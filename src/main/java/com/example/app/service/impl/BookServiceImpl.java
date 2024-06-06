@@ -5,6 +5,7 @@ import com.example.app.repository.BookRepository;
 import com.example.app.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,8 +17,9 @@ public class BookServiceImpl implements BookService {
     private BookRepository bookRepository;
 
     @Override
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public Flux<Book> getAllBooks() {
+        List<Book> books = bookRepository.findAll();
+        return Flux.fromIterable(books);
     }
 
     @Override
