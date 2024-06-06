@@ -35,6 +35,13 @@ public class BookController {
         return ResponseEntity.ok(bookMapper.bookToBookDTO(book));
     }
 
+    @GetMapping("/search")
+    public List<BookDTO> searchBooks(@RequestParam String query) {
+        List<Book> books = bookService.searchBooks(query);
+        return bookMapper.booksToBookDTOs(books);
+    }
+
+
     @PostMapping
     public BookDTO createBook(@Valid @RequestBody BookDTO bookDTO) {
         Book book = bookMapper.bookDTOToBook(bookDTO);
