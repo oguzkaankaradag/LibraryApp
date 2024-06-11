@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   mysqldb:
@@ -8,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: Mysql@123
       MYSQL_DATABASE: librarydb
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
@@ -17,7 +17,7 @@ services:
   springboot-restful-webservices:
     container_name: springboot-restful-webservices
     build:
-      context: ./
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
